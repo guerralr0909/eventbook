@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#1a1a2e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="EventBook"/>
+<title>EventBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#1a1a2e;--gold:#c9a96e;--cream:#f8f6f0;--border:#e0d8cc;--green:#2d6a4f;--red:#9b2226;--amber:#e9a825}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--navy)}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Splash ── */
+#splash{position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+#splash .sb{font-family:'Playfair Display',serif;font-size:36px;color:#fff;letter-spacing:3px}
+#splash .sb span{color:var(--gold)}
+#splash p{color:#aaa;font-size:12px;letter-spacing:2px;margin-top:8px}
+.spin{width:32px;height:32px;border:3px solid rgba(201,169,110,0.3);border-top-color:var(--gold);border-radius:50%;animation:sp 0.8s linear infinite;margin-top:32px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── Auth ── */
+.auth-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:30px 16px 60px;background:var(--cream)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .brand{font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);letter-spacing:3px}
+.auth-logo .brand span{color:var(--gold)}
+.auth-logo p{color:#888;font-size:11px;letter-spacing:2px;margin-top:4px}
+.auth-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:420px;margin-bottom:0}
+.auth-opt{background:#fff;border:2px solid var(--border);padding:18px 8px;text-align:center;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:7px}
+.auth-opt:active{border-color:var(--gold);background:var(--cream)}
+.auth-opt .aico{font-size:26px}
+.auth-opt .albl{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--navy)}
+.auth-card{background:#fff;border:1px solid var(--border);padding:24px 20px;width:100%;max-width:420px}
+.auth-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px}
+.auth-sub{color:#888;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.sdiv{display:flex;align-items:center;gap:10px;margin:16px 0}
+.sdiv span{color:#bbb;font-size:11px;letter-spacing:1px;white-space:nowrap}
+.sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.btn-link{background:none;border:none;color:var(--gold);font-size:13px;cursor:pointer;font-family:'Lato',sans-serif;text-decoration:underline;padding:0}
+
+/* ── Header ── */
+.header{background:var(--navy);display:none;align-items:center;justify-content:space-between;padding:0 10px;flex-shrink:0;box-shadow:0 2px 20px rgba(0,0,0,0.4);z-index:100;min-height:54px}
+.brand-sm{font-family:'Playfair Display',serif;font-size:16px;color:#fff;letter-spacing:2px}
+.brand-sm span{color:var(--gold)}
+.header-right{display:flex;align-items:center;gap:4px}
+.sync-dot{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--gold);letter-spacing:1px;padding:0 6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.user-btn{background:var(--gold);color:var(--navy);border:none;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;font-family:'Lato',sans-serif}
+
+/* ── Bottom nav ── */
+.bottom-nav{background:var(--navy);display:none;flex-shrink:0;border-top:2px solid var(--gold)}
+.bnav{display:flex;justify-content:space-around}
+.bnav-btn{background:none;border:none;cursor:pointer;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Lato',sans-serif;font-size:9px;letter-spacing:1px;color:#666;transition:all 0.2s;flex:1;position:relative}
+.bnav-btn.active{color:var(--gold)}
+.bnav-btn .ico{font-size:19px}
+.nbadge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--gold);color:var(--navy);width:15px;height:15px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ── Main ── */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen{display:none;padding:16px 14px 80px;max-width:600px;margin:0 auto}
+.screen.active{display:block}
+.screen-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:4px}
+.screen-sub{color:#888;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px}
+
+/* ── Cards ── */
+.card{background:#fff;border:1px solid var(--border);padding:18px;margin-bottom:14px}
+.card-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--navy);margin-bottom:14px}
+
+/* ── Fields ── */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:11px 12px;border:2px solid var(--border);font-size:15px;font-family:'Lato',sans-serif;outline:none;background:#fff;color:var(--navy);transition:border-color 0.2s;border-radius:0;-webkit-appearance:none;appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:70px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:#c0392b;font-size:11px;margin-top:4px}
+.ok-msg{color:var(--green);font-size:12px;margin-top:4px;font-weight:700}
+
+/* ── Calendar ── */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav{background:none;border:none;font-size:22px;cursor:pointer;color:var(--navy);padding:4px 10px;font-weight:700}
+.cal-month-lbl{font-family:'Playfair Display',serif;font-size:16px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-lbl{text-align:center;font-size:10px;color:#999;font-weight:700;padding:3px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;border:2px solid transparent;position:relative;background:#fff;color:var(--navy);transition:all 0.15s}
+.cal-day.today{border-color:var(--navy);font-weight:700}
+.cal-day.sel{background:var(--navy);color:var(--gold);border-color:var(--gold)}
+.cal-day.past{color:#ccc;cursor:not-allowed;background:#fafafa}
+.cal-day.hasres::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.date-bar{background:var(--navy);color:var(--gold);padding:9px 12px;font-size:11px;letter-spacing:1px;margin-top:10px;text-transform:uppercase}
+
+/* ── Time ── */
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.time-inner{display:flex;gap:5px;align-items:center}
+.time-inner select{flex:1}
+.tsep{color:#888;font-weight:700;font-size:16px;flex-shrink:0}
+
+/* ── Buttons ── */
+.btn-gold{background:var(--navy);color:var(--gold);border:none;padding:14px 20px;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Lato',sans-serif;font-weight:700;width:100%;transition:opacity 0.2s}
+.btn-gold:disabled{opacity:0.5;cursor:not-allowed}
+.btn-ol{background:transparent;color:var(--navy);border:2px solid var(--navy);padding:9px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:'Lato',sans-serif;font-weight:700}
+.btn-danger{background:transparent;color:var(--red);border:2px solid var(--red);padding:9px 14px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:'Lato',sans-serif;font-weight:700}
+.btn-sm{padding:7px 12px;font-size:11px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── Home stats ── */
+.home-user{background:var(--navy);color:#fff;padding:18px;margin-bottom:18px}
+.hu-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold)}
+.hu-local{font-size:12px;color:#aaa;margin-top:3px;letter-spacing:1px}
+.hu-role{font-size:10px;background:rgba(201,169,110,0.2);color:var(--gold);padding:3px 8px;display:inline-block;margin-top:6px;letter-spacing:1px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.stat-box{background:var(--cream);padding:14px;text-align:center}
+.stat-n{font-size:26px;font-weight:700}
+.stat-l{font-size:9px;color:#888;letter-spacing:1px;margin-top:3px}
+
+/* ── Reservation cards ── */
+.filters{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
+.fbtn{padding:7px 12px;font-size:11px;letter-spacing:1px;border:2px solid var(--border);background:transparent;color:#888;cursor:pointer;white-space:nowrap;font-family:'Lato',sans-serif;font-weight:700;transition:all 0.15s}
+.fbtn.active{border-color:var(--navy);background:var(--navy);color:var(--gold)}
+.rcard{background:#fff;border:1px solid var(--border);border-left:4px solid var(--green);padding:14px;margin-bottom:12px}
+.rcard.cancelada{border-left-color:var(--red);opacity:0.75}
+.rcard.pendiente{border-left-color:var(--amber)}
+.rheader{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
+.rname{font-family:'Playfair Display',serif;font-size:16px}
+.rid{font-size:10px;color:#aaa;font-family:monospace}
+.rstatus{padding:3px 9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#fff;white-space:nowrap;flex-shrink:0}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.rfield{background:var(--cream);padding:7px 9px}
+.rflabel{font-size:9px;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px}
+.rfval{font-size:13px;font-weight:700}
+.rcomment{font-size:13px;color:#666;padding:7px 10px;background:var(--cream);border-left:2px solid var(--gold);margin-bottom:10px}
+
+/* ── Colabs ── */
+.colab-card{background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.colab-name{font-family:'Playfair Display',serif;font-size:16px}
+.colab-user{font-size:11px;color:#888;margin-top:2px}
+.colab-badge{background:var(--gold);color:var(--navy);padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:1px;white-space:nowrap}
+
+/* ── Loc options ── */
+.loc-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.loc-opt{background:var(--cream);border:2px solid var(--border);padding:12px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;transition:all 0.2s}
+.loc-opt.active{border-color:var(--gold);background:#fff}
+.lico{font-size:20px;display:block;margin-bottom:4px}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;width:100%;max-width:400px;padding:22px;max-height:85vh;overflow-y:auto}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:16px}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:#888;margin-top:-4px}
+
+/* ── Confirm screen ── */
+.confirm-check{width:54px;height:54px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px;color:#fff}
+.confirm-center{text-align:center;margin-bottom:24px}
+.confirm-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px}
+.confirm-id{color:#888;font-size:11px;letter-spacing:2px;font-family:monospace}
+.summary{background:var(--cream);margin-bottom:18px}
+.srow{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.skey{font-size:10px;letter-spacing:1.5px;color:#888;text-transform:uppercase;flex-shrink:0;margin-right:10px}
+.sval{font-weight:700;font-size:14px;text-align:right;word-break:break-word}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:50px 20px;color:#888}
+.empty-ico{font-size:40px;margin-bottom:12px}
+.empty-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold);padding:12px 22px;font-size:13px;border-left:4px solid var(--gold);z-index:9999;box-shadow:0 8px 40px rgba(0,0,0,0.4);animation:su 0.3s ease;display:none;max-width:90vw;text-align:center}
+@keyframes su{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── Install banner ── */
+.ibanner{background:var(--gold);color:var(--navy);padding:10px 14px;display:none;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;flex-shrink:0;gap:10px}
+.ibanner button{background:var(--navy);color:var(--gold);border:none;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.iclose{background:none!important;color:var(--navy)!important;border:none;font-size:18px;cursor:pointer;padding:0 4px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Splash -->
+  <div id="splash">
+    <div class="sb">EVENT<span>BOOK</span></div>
+    <p>SISTEMA DE RESERVAS</p>
+    <div class="spin"></div>
+  </div>
+
+  <!-- Install banner -->
+  <div class="ibanner" id="ib">
+    <span>📱 Instalá EventBook como app</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="ibBtn">Instalar</button>
+      <button class="iclose" id="ibClose">✕</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header" id="mainHeader">
+    <div class="brand-sm">EVENT<span>BOOK</span></div>
+    <div class="header-right">
+      <div class="sync-dot"><div class="dot" id="sdot"></div><span id="slbl">FIREBASE</span></div>
+      <button class="user-btn" onclick="doLogout()">⎋ Salir</button>
+    </div>
+  </div>
+
+  <!-- Auth -->
+  <div class="auth-wrap" id="authWrap" style="display:none">
+    <div class="auth-logo">
+      <div class="brand">EVENT<span>BOOK</span></div>
+      <p>SISTEMA DE RESERVAS</p>
+    </div>
+
+    <!-- Welcome -->
+    <div id="scWelcome" style="width:100%;max-width:420px">
+      <div class="auth-options">
+        <div class="auth-opt" onclick="showAuth('login')"><span class="aico">🔑</span><span class="albl">INICIAR SESIÓN</span></div>
+        <div class="auth-opt" onclick="showAuth('register')"><span class="aico">📝</span><span class="albl">REGISTRARSE</span></div>
+        <div class="auth-opt" onclick="showAuth('colab-login')"><span class="aico">🤝</span><span class="albl">COLABORADOR</span></div>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div id="scLogin" style="display:none;width:100%;max-width:420px">
+      <div class="auth-card">
+        <div class="auth-title">Iniciar Sesión</div>
+        <div class="auth-sub">Ingresá tus credenciales</div>
+        <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com"/></div>
+        <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+        <p class="err" id="loginErr" style="display:none;margin-bottom:10px"></p>
+        <button class="btn-gold" id="loginBtn" onclick="doLogin()">INGRESAR</button>
+        <div class="sdiv"><span>¿No tenés cuenta?</span></div>
+        <button class="btn-ol" style="width:100%" onclick="showAuth('register')">Registrarse</button>
+      </div>
+      <div style="text-align:center;margin-top:14px"><button class="btn-link" onclick="showAuth('welcome')">← Volver</button></div>
+    </div>
+
+    <!-- Register -->
+    <div id="scRegister" style="display:none;width:100%;max-width:420px">
+      <div class="auth-card">
+        <div class="auth-title">Crear Cuenta</div>
+        <div class="auth-sub">Completá tus datos</div>
+        <div class="field-row">
+          <div class="field"><label>Nombre *</label><input type="text" id="regNombre" placeholder="María"/></div>
+          <div class="field"><label>Apellido *</label><input type="text" id="regApellido" placeholder="González"/></div>
+        </div>
+        <div class="field"><label>Nombre del local *</label><input type="text" id="regLocal" placeholder="Mi Salón de Eventos"/></div>
+        <div class="field"><label>Teléfono *</label><input type="tel" id="regTel" placeholder="+54 11 1234-5678"/></div>
+        <div class="field"><label>Email *</label><input type="email" id="regEmail" placeholder="tu@email.com"/></div>
+        <div class="field"><label>Contraseña *</label><input type="password" id="regPass" placeholder="Mínimo 6 caracteres"/></div>
+        <div class="field">
+          <label>Ubicación del local</label>
+          <div class="loc-options">
+            <div class="loc-opt" id="locGps" onclick="getGpsLocation()"><span class="lico">📍</span>GPS Actual</div>
+            <div class="loc-opt" id="locManual" onclick="toggleManualLoc()"><span class="lico">✏️</span>Manual</div>
+          </div>
+          <input type="text" id="regUbicacion" placeholder="Dirección del local" style="display:none"/>
+          <p class="ok-msg" id="locOk" style="display:none">📍 Ubicación obtenida</p>
+        </div>
+        <p class="err" id="regErr" style="display:none;margin-bottom:10px"></p>
+        <button class="btn-gold" id="regBtn" onclick="doRegister()">CREAR CUENTA</button>
+      </div>
+      <div style="text-align:center;margin-top:14px"><button class="btn-link" onclick="showAuth('welcome')">← Volver</button></div>
+    </div>
+
+    <!-- Colab login -->
+    <div id="scColabLogin" style="display:none;width:100%;max-width:420px">
+      <div class="auth-card">
+        <div class="auth-title">Acceso Colaborador</div>
+        <div class="auth-sub">Ingresá con tu usuario</div>
+        <div class="field"><label>Usuario</label><input type="text" id="colabUser" placeholder="usuario.colaborador"/></div>
+        <div class="field"><label>Contraseña</label><input type="password" id="colabPass" placeholder="••••••••"/></div>
+        <p class="err" id="colabErr" style="display:none;margin-bottom:10px"></p>
+        <button class="btn-gold" id="colabBtn" onclick="doColabLogin()">INGRESAR</button>
+      </div>
+      <div style="text-align:center;margin-top:14px"><button class="btn-link" onclick="showAuth('welcome')">← Volver</button></div>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div class="main" id="mainApp" style="display:none">
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="home-user">
+        <div class="hu-name" id="homeUserName">—</div>
+        <div class="hu-local" id="homeLocal">—</div>
+        <div class="hu-role" id="homeRole">—</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Resumen</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-n" id="statTotal">0</div><div class="stat-l">TOTALES</div></div>
+          <div class="stat-box"><div class="stat-n" style="color:var(--green)" id="statConf">0</div><div class="stat-l">ACTIVAS</div></div>
+          <div class="stat-box"><div class="stat-n" style="color:var(--red)" id="statCanc">0</div><div class="stat-l">CANCELADAS</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="card" style="cursor:pointer;text-align:center" onclick="showTab('new')">
+          <div style="font-size:30px;margin-bottom:8px">＋</div>
+          <div style="font-family:'Playfair Display',serif;font-size:15px">Nueva Reserva</div>
+        </div>
+        <div class="card" style="cursor:pointer;text-align:center" onclick="showTab('list')">
+          <div style="font-size:30px;margin-bottom:8px">☰</div>
+          <div style="font-family:'Playfair Display',serif;font-size:15px">Mis Reservas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUEVA RESERVA -->
+    <div class="screen" id="screen-new">
+      <div class="screen-title">Nueva Reserva</div>
+      <div class="screen-sub">Completá los datos del evento</div>
+      <div class="card">
+        <div class="card-title">📅 Fecha del evento</div>
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <span class="cal-month-lbl" id="calMonth"></span>
+          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calLabels"></div>
+        <div class="cal-grid" id="calCells"></div>
+        <div class="date-bar" id="dateBar" style="display:none"></div>
+        <p class="err" id="errDate" style="display:none">Seleccioná una fecha</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🕐 Horario</div>
+        <div class="time-row">
+          <div class="field"><label>Inicio</label><div class="time-inner"><select id="sH"></select><span class="tsep">:</span><select id="sM"></select></div></div>
+          <div class="field"><label>Finalización</label><div class="time-inner"><select id="eH"></select><span class="tsep">:</span><select id="eM"></select></div></div>
+        </div>
+        <p class="err" id="errTime" style="display:none">El fin debe ser posterior al inicio</p>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Datos del cliente</div>
+        <div class="field"><label>Nombre y Apellido *</label><input type="text" id="clientName" placeholder="Ej: María González"/><p class="err" id="errName" style="display:none">Ingresá el nombre</p></div>
+        <div class="field"><label>Observaciones</label><textarea id="comments" placeholder="Detalles del evento, requerimientos especiales..."></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💳 Estado del pago</div>
+        <div class="field"><label>Condición de pago</label>
+          <select id="payStatus" onchange="toggleAmt()">
+            <option value="total">Total abonado</option>
+            <option value="seña">Seña abonada</option>
+            <option value="cancela">Cancela al finalizar</option>
+            <option value="monto">Ingresar monto pagado</option>
+          </select>
+        </div>
+        <div class="field" id="amtField" style="display:none"><label>Importe abonado ($)</label><input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/></div>
+      </div>
+      <button class="btn-gold" onclick="doConfirm()">CONFIRMAR RESERVA</button>
+    </div>
+
+    <!-- CONFIRMACIÓN -->
+    <div class="screen" id="screen-confirm">
+      <div class="confirm-center">
+        <div class="confirm-check">✓</div>
+        <div class="confirm-title" id="confirmTitleTxt">Reserva Confirmada</div>
+        <div class="confirm-id" id="cId"></div>
+      </div>
+      <div class="summary" id="cSummary"></div>
+      <div style="margin-bottom:10px"><button class="btn-gold" onclick="doPDF(null,false)">⬇ Descargar Comprobante PDF</button></div>
+      <button class="btn-ol" style="width:100%" onclick="doNew()">+ Nueva Reserva</button>
+    </div>
+
+    <!-- MIS RESERVAS -->
+    <div class="screen" id="screen-list">
+      <div class="screen-title">Mis Reservas</div>
+      <div class="screen-sub">Historial de reservas</div>
+      <div class="filters">
+        <button class="fbtn active" onclick="setFilter('todas',this)">Todas</button>
+        <button class="fbtn" onclick="setFilter('confirmada',this)">Confirmadas</button>
+        <button class="fbtn" onclick="setFilter('pendiente',this)">Pendientes</button>
+        <button class="fbtn" onclick="setFilter('cancelada',this)">Canceladas</button>
+      </div>
+      <div id="resList"></div>
+    </div>
+
+    <!-- COLABORADORES -->
+    <div class="screen" id="screen-colabs">
+      <div class="screen-title">Colaboradores</div>
+      <div class="screen-sub">Gestión de colaboradores</div>
+      <div class="card">
+        <div class="card-title">➕ Nuevo Colaborador</div>
+        <div class="field-row">
+          <div class="field"><label>Nombre *</label><input type="text" id="cnNombre" placeholder="Juan"/></div>
+          <div class="field"><label>Apellido *</label><input type="text" id="cnApellido" placeholder="García"/></div>
+        </div>
+        <div class="field"><label>Usuario *</label><input type="text" id="cnUser" placeholder="juan.garcia"/></div>
+        <div class="field"><label>Contraseña *</label><input type="password" id="cnPass" placeholder="Mínimo 6 caracteres"/></div>
+        <p class="err" id="cnErr" style="display:none;margin-bottom:8px"></p>
+        <button class="btn-gold" onclick="addColab()">CREAR COLABORADOR</button>
+      </div>
+      <div id="colabList"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav" id="bottomNav">
+    <div class="bnav">
+      <button class="bnav-btn active" id="tab-home" onclick="showTab('home')"><span class="ico">🏠</span>INICIO</button>
+      <button class="bnav-btn" id="tab-new" onclick="showTab('new')"><span class="ico">＋</span>NUEVA</button>
+      <button class="bnav-btn" id="tab-list" onclick="showTab('list')"><span class="ico">☰</span>RESERVAS<span class="nbadge" id="nbadge" style="display:none">0</span></button>
+      <button class="bnav-btn" id="tab-colabs" onclick="showTab('colabs')" style="display:none"><span class="ico">👥</span>EQUIPO</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    <div class="modal-title">Editar Reserva</div>
+    <div class="field"><label>Estado</label>
+      <select id="editStatus">
+        <option value="confirmada">Confirmada</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+    </div>
+    <div class="field"><label>Observaciones</label><textarea id="editComments" rows="3"></textarea></div>
+    <button class="btn-gold" onclick="saveEdit()">GUARDAR CAMBIOS</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, onSnapshot, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Firebase config ──────────────────────────────────
+var FB_CFG = {
+  apiKey: "AIzaSyAxz8FzlsokdbCd9I4x57FwozN2FfktJU4",
+  authDomain: "eventbook-4d123.firebaseapp.com",
+  projectId: "eventbook-4d123",
+  storageBucket: "eventbook-4d123.firebasestorage.app",
+  messagingSenderId: "161176393899",
+  appId: "1:161176393899:web:a59dce39a3634d7172ffee"
+};
+
+var fbApp = initializeApp(FB_CFG);
+var auth = getAuth(fbApp);
+var db = getFirestore(fbApp);
+
+// ── State ────────────────────────────────────────────
+var currentUser = null;   // {type, ownerId, uid, nombre, apellido, local, ...}
+var reservas = [];
+var filtro = 'todas';
+var fechaSel = '';
+var vYear, vMonth;
+var editId = null;
+var resConfirmada = null;
+var toastTmr = null;
+var gpsCoords = null;
+var resUnsubscribe = null;
+
+var MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DIA = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+var PAY_LBL = {total:'Total abonado', seña:'Seña abonada', cancela:'Cancela al finalizar', monto:'Monto ingresado'};
+var SC = {confirmada:'#2d6a4f', cancelada:'#9b2226', pendiente:'#e9a825'};
+var SL = {confirmada:'Confirmada', cancelada:'Cancelada', pendiente:'Pendiente'};
+
+// ── Init ─────────────────────────────────────────────
+var hoy = new Date();
+vYear = hoy.getFullYear();
+vMonth = hoy.getMonth();
+buildTimes();
+
+// Install prompt
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault(); window._defer = e;
+  document.getElementById('ib').style.display = 'flex';
+});
+document.getElementById('ibBtn').onclick = function() {
+  if (!window._defer) return;
+  window._defer.prompt();
+  window._defer.userChoice.then(function(){ window._defer=null; document.getElementById('ib').style.display='none'; });
+};
+document.getElementById('ibClose').onclick = function(){ document.getElementById('ib').style.display='none'; };
+
+// Auth state observer
+onAuthStateChanged(auth, async function(fbUser) {
+  hideSplash();
+  if (fbUser) {
+    // Owner logged in via Firebase Auth
+    try {
+      var snap = await getDoc(doc(db, 'users', fbUser.uid));
+      if (snap.exists()) {
+        var data = snap.data();
+        currentUser = {type:'owner', ownerId:fbUser.uid, uid:fbUser.uid, nombre:data.nombre, apellido:data.apellido, local:data.local, email:data.email, ubicacion:data.ubicacion||''};
+        enterApp();
+      } else {
+        await signOut(auth);
+        showAuth('welcome');
+      }
+    } catch(e) { showAuth('welcome'); }
+  } else {
+    // Check if colab session stored
+    try {
+      var cs = JSON.parse(sessionStorage.getItem('eb-colab'));
+      if (cs) { currentUser = cs; enterApp(); return; }
+    } catch(e){}
+    showAuth('welcome');
+  }
+});
+
+function hideSplash() {
+  var s = document.getElementById('splash');
+  if (s) { s.style.opacity='0'; s.style.transition='opacity 0.4s'; setTimeout(function(){ s.style.display='none'; },400); }
+}
+
+// ── Auth screens ─────────────────────────────────────
+window.showAuth = function(name) {
+  ['scWelcome','scLogin','scRegister','scColabLogin'].forEach(function(s){ document.getElementById(s).style.display='none'; });
+  var map = {welcome:'scWelcome', login:'scLogin', register:'scRegister', 'colab-login':'scColabLogin'};
+  if (map[name]) document.getElementById(map[name]).style.display = 'block';
+  document.getElementById('authWrap').style.display = 'flex';
+};
+
+// ── Login ─────────────────────────────────────────────
+window.doLogin = async function() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  if (!email||!pass) { showErrEl(errEl,'Completá todos los campos'); return; }
+  setBtnLoading('loginBtn', true);
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged will handle the rest
+  } catch(e) {
+    var msg = 'Email o contraseña incorrectos';
+    if (e.code==='auth/user-not-found') msg = 'No existe una cuenta con ese email';
+    if (e.code==='auth/wrong-password') msg = 'Contraseña incorrecta';
+    if (e.code==='auth/invalid-email') msg = 'Email inválido';
+    showErrEl(errEl, msg);
+    setBtnLoading('loginBtn', false);
+  }
+};
+
+// ── Register ──────────────────────────────────────────
+window.doRegister = async function() {
+  var nombre = document.getElementById('regNombre').value.trim();
+  var apellido = document.getElementById('regApellido').value.trim();
+  var local = document.getElementById('regLocal').value.trim();
+  var tel = document.getElementById('regTel').value.trim();
+  var email = document.getElementById('regEmail').value.trim().toLowerCase();
+  var pass = document.getElementById('regPass').value;
+  var ubicacion = document.getElementById('regUbicacion').value.trim();
+  var errEl = document.getElementById('regErr');
+  errEl.style.display = 'none';
+
+  if (!nombre||!apellido||!local||!tel||!email||!pass) { showErrEl(errEl,'Completá todos los campos obligatorios'); return; }
+  if (pass.length < 6) { showErrEl(errEl,'La contraseña debe tener al menos 6 caracteres'); return; }
+
+  // Check duplicate phone in Firestore
+  var telQ = await getDocs(query(collection(db,'users'), where('tel','==',tel)));
+  if (!telQ.empty) { showErrEl(errEl,'Ya existe una cuenta con ese teléfono'); return; }
+
+  var loc = ubicacion || (gpsCoords ? 'GPS: '+gpsCoords.lat.toFixed(5)+', '+gpsCoords.lng.toFixed(5) : '');
+
+  setBtnLoading('regBtn', true);
+  try {
+    var cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db,'users',cred.user.uid), {
+      nombre:nombre, apellido:apellido, local:local, tel:tel,
+      email:email, ubicacion:loc, colabs:[], createdAt:new Date().toISOString()
+    });
+    showToast('¡Cuenta creada correctamente!');
+    // onAuthStateChanged will handle enterApp
+  } catch(e) {
+    var msg = 'Error al crear la cuenta';
+    if (e.code==='auth/email-already-in-use') msg = 'Ya existe una cuenta registrada con ese email';
+    if (e.code==='auth/invalid-email') msg = 'Email inválido';
+    showErrEl(errEl, msg);
+    setBtnLoading('regBtn', false);
+  }
+};
+
+// ── Colab login ───────────────────────────────────────
+window.doColabLogin = async function() {
+  var user = document.getElementById('colabUser').value.trim().toLowerCase();
+  var pass = document.getElementById('colabPass').value;
+  var errEl = document.getElementById('colabErr');
+  errEl.style.display = 'none';
+  if (!user||!pass) { showErrEl(errEl,'Completá todos los campos'); return; }
+  setBtnLoading('colabBtn', true);
+
+  try {
+    // Search all users' colabs array in Firestore
+    var snap = await getDocs(collection(db,'users'));
+    var found = null, ownerData = null, ownerId = null;
+    snap.forEach(function(d) {
+      var data = d.data();
+      if (data.colabs) {
+        data.colabs.forEach(function(c) {
+          if (c.user.toLowerCase()===user && c.pass===simpleHash(pass)) {
+            found = c; ownerData = data; ownerId = d.id;
+          }
+        });
+      }
+    });
+    if (!found) { showErrEl(errEl,'Usuario o contraseña incorrectos'); setBtnLoading('colabBtn',false); return; }
+    currentUser = {type:'colab', ownerId:ownerId, id:found.id, nombre:found.nombre, apellido:found.apellido, local:ownerData.local, colabUser:found.user};
+    try { sessionStorage.setItem('eb-colab', JSON.stringify(currentUser)); } catch(e){}
+    enterApp();
+  } catch(e) { showErrEl(errEl,'Error de conexión. Intentá de nuevo.'); setBtnLoading('colabBtn',false); }
+};
+
+// ── Logout ────────────────────────────────────────────
+window.doLogout = async function() {
+  if (resUnsubscribe) resUnsubscribe();
+  try { sessionStorage.removeItem('eb-colab'); } catch(e){}
+  currentUser = null; reservas = [];
+  if (auth.currentUser) await signOut(auth);
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('bottomNav').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'none';
+  showAuth('welcome');
+};
+
+// ── Enter app ─────────────────────────────────────────
+function enterApp() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'flex';
+  document.getElementById('bottomNav').style.display = 'block';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('tab-colabs').style.display = currentUser.type==='owner' ? 'flex' : 'none';
+  setSyncSt(true);
+  subscribeReservations();
+  renderCal();
+  showTab('home');
+}
+
+// ── Real-time reservations ─────────────────────────────
+function subscribeReservations() {
+  if (resUnsubscribe) resUnsubscribe();
+  var q = query(collection(db,'reservations'), where('ownerId','==',currentUser.ownerId));
+  resUnsubscribe = onSnapshot(q, function(snap) {
+    reservas = [];
+    snap.forEach(function(d){ reservas.push(Object.assign({id:d.id}, d.data())); });
+    reservas.sort(function(a,b){ return new Date(b.createdAt)-new Date(a.createdAt); });
+    updateHomeStats();
+    updateBadge();
+    renderCal();
+    if (document.getElementById('screen-list').classList.contains('active')) renderList();
+  }, function(err){ setSyncSt(false); });
+}
+
+// ── Tabs ──────────────────────────────────────────────
+window.showTab = function(name) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById('screen-'+name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.bnav-btn').forEach(function(b){ b.classList.remove('active'); });
+  var tb = document.getElementById('tab-'+name);
+  if (tb) tb.classList.add('active');
+  if (name==='list') renderList();
+  if (name==='colabs') renderColabs();
+  if (name==='home') updateHomeStats();
+  document.getElementById('mainApp').scrollTo(0,0);
+};
+
+function updateHomeStats() {
+  document.getElementById('statTotal').textContent = reservas.length;
+  document.getElementById('statConf').textContent = reservas.filter(function(r){ return r.status!=='cancelada'; }).length;
+  document.getElementById('statCanc').textContent = reservas.filter(function(r){ return r.status==='cancelada'; }).length;
+  if (currentUser) {
+    document.getElementById('homeUserName').textContent = currentUser.nombre+' '+currentUser.apellido;
+    document.getElementById('homeLocal').textContent = currentUser.local||'';
+    document.getElementById('homeRole').textContent = currentUser.type==='owner' ? 'PROPIETARIO' : 'COLABORADOR';
+  }
+}
+
+// ── Calendar ──────────────────────────────────────────
+function renderCal() {
+  var el = document.getElementById('calMonth');
+  if (!el) return;
+  el.textContent = MES[vMonth]+' '+vYear;
+  document.getElementById('calLabels').innerHTML = DIA.map(function(d){ return '<div class="cal-lbl">'+d+'</div>'; }).join('');
+  var todayStr = pad(hoy.getFullYear())+'-'+pad(hoy.getMonth()+1)+'-'+pad(hoy.getDate());
+  var first = new Date(vYear,vMonth,1).getDay();
+  var total = new Date(vYear,vMonth+1,0).getDate();
+  var resSet = {};
+  reservas.forEach(function(r){ if (r.status!=='cancelada') resSet[r.date]=true; });
+  var html='';
+  for (var i=0;i<first;i++) html+='<div></div>';
+  for (var d=1;d<=total;d++) {
+    var ds=pad(vYear)+'-'+pad(vMonth+1)+'-'+pad(d);
+    var isPast=ds<todayStr;
+    var cls='cal-day'+(ds===todayStr?' today':'')+(ds===fechaSel?' sel':'')+(isPast?' past':'')+(resSet[ds]?' hasres':'');
+    html+='<div class="'+cls+'"'+(isPast?'':' onclick="selDate(\''+ds+'\')"')+'>'+d+'</div>';
+  }
+  document.getElementById('calCells').innerHTML = html;
+  var bar = document.getElementById('dateBar');
+  if (fechaSel) {
+    var pts=fechaSel.split('-');
+    bar.textContent = new Date(+pts[0],+pts[1]-1,+pts[2]).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+    bar.style.display='block';
+  } else bar.style.display='none';
+}
+window.changeMonth = function(dir){ vMonth+=dir; if(vMonth<0){vMonth=11;vYear--;} if(vMonth>11){vMonth=0;vYear++;} renderCal(); };
+window.selDate = function(d){ fechaSel=d; document.getElementById('errDate').style.display='none'; renderCal(); };
+
+// ── Time ──────────────────────────────────────────────
+function buildTimes() {
+  var hh='',mm='';
+  for (var i=0;i<24;i++) hh+='<option value="'+pad(i)+'">'+pad(i)+'</option>';
+  ['00','15','30','45'].forEach(function(m){ mm+='<option value="'+m+'">'+m+'</option>'; });
+  ['sH','eH'].forEach(function(id){ document.getElementById(id).innerHTML=hh; });
+  ['sM','eM'].forEach(function(id){ document.getElementById(id).innerHTML=mm; });
+  document.getElementById('sH').value='09';
+  document.getElementById('eH').value='10';
+}
+function getTime(p){ return document.getElementById(p+'H').value+':'+document.getElementById(p+'M').value; }
+window.toggleAmt = function(){ document.getElementById('amtField').style.display=document.getElementById('payStatus').value==='monto'?'block':'none'; };
+
+// ── Confirm reservation ───────────────────────────────
+window.doConfirm = async function() {
+  var ok=true;
+  if (!fechaSel){document.getElementById('errDate').style.display='block';ok=false;}
+  if (!document.getElementById('clientName').value.trim()){document.getElementById('errName').style.display='block';ok=false;}
+  var st=getTime('s'),et=getTime('e');
+  if (st>=et){document.getElementById('errTime').style.display='block';ok=false;}
+  if (!ok) return;
+  var pv=document.getElementById('payStatus').value;
+  var r={
+    ownerId:currentUser.ownerId,
+    createdBy:currentUser.nombre+' '+currentUser.apellido,
+    date:fechaSel, startTime:st, endTime:et,
+    clientName:document.getElementById('clientName').value.trim(),
+    comments:document.getElementById('comments').value.trim(),
+    paymentStatus:PAY_LBL[pv]||pv,
+    amount:pv==='monto'?document.getElementById('amount').value:'',
+    status:'confirmada', modified:false,
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  try {
+    var ref = await addDoc(collection(db,'reservations'), r);
+    r.id = ref.id;
+    resConfirmada = r;
+    document.getElementById('confirmTitleTxt').textContent='Reserva Confirmada';
+    document.getElementById('confirmTitleTxt').style.color='';
+    showConfirm(r);
+    showToast('¡Reserva guardada en Firebase!');
+  } catch(e){ showToast('Error al guardar. Verificá tu conexión.'); }
+};
+
+function showConfirm(r) {
+  document.getElementById('cId').textContent='CÓDIGO: '+(r.id||'').toUpperCase();
+  var pts=r.date.split('-');
+  var dl=new Date(+pts[0],+pts[1]-1,+pts[2]).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var rows=[['Cliente',r.clientName],['Fecha',dl],['Horario',r.startTime+' — '+r.endTime],['Estado de pago',r.paymentStatus]];
+  if (r.amount) rows.push(['Monto','$'+r.amount]);
+  if (r.comments) rows.push(['Observaciones',r.comments]);
+  if (r.createdBy) rows.push(['Registrado por',r.createdBy]);
+  document.getElementById('cSummary').innerHTML=rows.map(function(row){
+    return '<div class="srow"><span class="skey">'+row[0]+'</span><span class="sval">'+row[1]+'</span></div>';
+  }).join('');
+  window.showTab('confirm');
+}
+
+window.doNew = function() {
+  fechaSel='';
+  ['clientName','comments','amount'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('payStatus').value='total';
+  document.getElementById('amtField').style.display='none';
+  document.getElementById('sH').value='09'; document.getElementById('sM').value='00';
+  document.getElementById('eH').value='10'; document.getElementById('eM').value='00';
+  ['errDate','errName','errTime'].forEach(function(id){ document.getElementById(id).style.display='none'; });
+  renderCal();
+  window.showTab('new');
+};
+
+// ── Reservation list ──────────────────────────────────
+window.setFilter = function(f,btn) {
+  filtro=f;
+  document.querySelectorAll('.fbtn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderList();
+};
+
+function renderList() {
+  var filtered=reservas.filter(function(r){ return filtro==='todas'||r.status===filtro; });
+  var el=document.getElementById('resList');
+  if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-ico">📋</div><div class="empty-title">Sin reservas</div><p>No hay reservas en esta categoría</p></div>'; return; }
+  el.innerHTML=filtered.map(function(r) {
+    var pts=r.date.split('-');
+    var dl=new Date(+pts[0],+pts[1]-1,+pts[2]).toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});
+    var fields=[['Fecha',dl],['Horario',r.startTime+'–'+r.endTime],['Pago',r.paymentStatus]];
+    if (r.amount) fields.push(['Monto','$'+r.amount]);
+    var rj=encodeURIComponent(JSON.stringify(r));
+    var modBadge=r.modified?'<span style="background:var(--red);color:#fff;padding:2px 7px;font-size:9px;margin-left:6px">MOD</span>':'';
+    return '<div class="rcard '+r.status+'">'
+      +'<div class="rheader"><div><div class="rname">'+r.clientName+modBadge+'</div><div class="rid">'+(r.id||'').toUpperCase().substr(0,12)+(r.createdBy?' · '+r.createdBy:'')+'</div></div>'
+      +'<div class="rstatus" style="background:'+(SC[r.status]||'#888')+'">'+(SL[r.status]||r.status)+'</div></div>'
+      +'<div class="rgrid">'+fields.map(function(f){ return '<div class="rfield"><div class="rflabel">'+f[0]+'</div><div class="rfval">'+f[1]+'</div></div>'; }).join('')+'</div>'
+      +(r.comments?'<div class="rcomment">'+r.comments+'</div>':'')
+      +'<div class="btn-row">'
+      +(r.status!=='cancelada'
+        ?'<button class="btn-ol btn-sm" onclick="openEditModal(\''+r.id+'\')">✏ Editar</button>'
+         +'<button class="btn-danger btn-sm" onclick="doCancelRes(\''+r.id+'\')">✕ Eliminar</button>':'')
+      +'<button class="btn-ol btn-sm" onclick="doPDF(JSON.parse(decodeURIComponent(\''+rj+'\')),false)">⬇ PDF</button>'
+      +(r.modified?'<button class="btn-ol btn-sm" style="color:var(--red);border-color:var(--red)" onclick="doPDF(JSON.parse(decodeURIComponent(\''+rj+'\')),true)">⬇ PDF Mod</button>':'')
+      +'</div></div>';
+  }).join('');
+}
+
+// ── Edit modal ────────────────────────────────────────
+window.openEditModal = function(id) {
+  editId=id;
+  var r=reservas.find(function(x){ return x.id===id; });
+  if (!r) return;
+  document.getElementById('editStatus').value=r.status;
+  document.getElementById('editComments').value=r.comments||'';
+  document.getElementById('editModal').classList.add('open');
+};
+window.closeModal = function(id){ document.getElementById(id).classList.remove('open'); };
+window.saveEdit = async function() {
+  var r=reservas.find(function(x){ return x.id===editId; });
+  if (!r) return;
+  var newStatus=document.getElementById('editStatus').value;
+  var newComments=document.getElementById('editComments').value;
+  var changed=newStatus!==r.status||newComments!==r.comments;
+  try {
+    await updateDoc(doc(db,'reservations',editId),{
+      status:newStatus, comments:newComments, modified:changed||r.modified,
+      updatedAt:new Date().toISOString()
+    });
+    closeModal('editModal');
+    showToast('Reserva actualizada');
+    if (changed) {
+      var updated=Object.assign({},r,{status:newStatus,comments:newComments,modified:true});
+      resConfirmada=updated;
+      document.getElementById('confirmTitleTxt').textContent='Reserva Modificada';
+      document.getElementById('confirmTitleTxt').style.color='#9b2226';
+      showConfirm(updated);
+    }
+  } catch(e){ showToast('Error al actualizar'); }
+};
+
+window.doCancelRes = async function(id) {
+  if (!confirm('¿Eliminar esta reserva?')) return;
+  try {
+    await updateDoc(doc(db,'reservations',id),{status:'cancelada',updatedAt:new Date().toISOString()});
+    showToast('Reserva eliminada');
+  } catch(e){ showToast('Error al eliminar'); }
+};
+
+// ── Collaborators ─────────────────────────────────────
+window.addColab = async function() {
+  var nombre=document.getElementById('cnNombre').value.trim();
+  var apellido=document.getElementById('cnApellido').value.trim();
+  var user=document.getElementById('cnUser').value.trim().toLowerCase();
+  var pass=document.getElementById('cnPass').value;
+  var errEl=document.getElementById('cnErr');
+  errEl.style.display='none';
+  if (!nombre||!apellido||!user||!pass){showErrEl(errEl,'Completá todos los campos');return;}
+  if (pass.length<6){showErrEl(errEl,'Contraseña mínimo 6 caracteres');return;}
+
+  // Check username unique across all users
+  var snap=await getDocs(collection(db,'users'));
+  var dup=false;
+  snap.forEach(function(d){ var data=d.data(); if(data.colabs) data.colabs.forEach(function(c){ if(c.user===user) dup=true; }); });
+  if (dup){showErrEl(errEl,'Ese nombre de usuario ya existe');return;}
+
+  var ownerSnap=await getDoc(doc(db,'users',currentUser.ownerId));
+  if (!ownerSnap.exists()) return;
+  var ownerData=ownerSnap.data();
+  var colabs=ownerData.colabs||[];
+  colabs.push({id:'COL-'+Math.random().toString(36).substr(2,8).toUpperCase(), nombre:nombre, apellido:apellido, user:user, pass:simpleHash(pass), createdAt:new Date().toISOString()});
+  await updateDoc(doc(db,'users',currentUser.ownerId),{colabs:colabs});
+  ['cnNombre','cnApellido','cnUser','cnPass'].forEach(function(id){ document.getElementById(id).value=''; });
+  renderColabs();
+  showToast('Colaborador creado: @'+user);
+};
+
+async function renderColabs() {
+  var snap=await getDoc(doc(db,'users',currentUser.ownerId));
+  var colabs=snap.exists()&&snap.data().colabs?snap.data().colabs:[];
+  var el=document.getElementById('colabList');
+  if (!colabs.length){el.innerHTML='<div class="empty"><div class="empty-ico">👥</div><div class="empty-title">Sin colaboradores</div><p>Creá el primero arriba</p></div>';return;}
+  el.innerHTML=colabs.map(function(c){
+    return '<div class="colab-card"><div><div class="colab-name">'+c.nombre+' '+c.apellido+'</div><div class="colab-user">@'+c.user+'</div></div>'
+      +'<div style="display:flex;gap:8px;align-items:center"><span class="colab-badge">COLABORADOR</span>'
+      +'<button class="btn-danger btn-sm" onclick="deleteColab(\''+c.id+'\')">✕</button></div></div>';
+  }).join('');
+}
+
+window.deleteColab = async function(cid) {
+  if (!confirm('¿Eliminar este colaborador?')) return;
+  var snap=await getDoc(doc(db,'users',currentUser.ownerId));
+  if (!snap.exists()) return;
+  var colabs=(snap.data().colabs||[]).filter(function(c){ return c.id!==cid; });
+  await updateDoc(doc(db,'users',currentUser.ownerId),{colabs:colabs});
+  renderColabs();
+  showToast('Colaborador eliminado');
+};
+
+// ── Location ──────────────────────────────────────────
+window.getGpsLocation = function() {
+  if (!navigator.geolocation){showToast('GPS no disponible');return;}
+  document.getElementById('locGps').innerHTML='<span class="lico">⏳</span>Obteniendo...';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    gpsCoords={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    document.getElementById('locGps').innerHTML='<span class="lico">✅</span>GPS OK';
+    document.getElementById('locGps').classList.add('active');
+    document.getElementById('locOk').style.display='block';
+    showToast('Ubicación obtenida');
+  },function(){
+    document.getElementById('locGps').innerHTML='<span class="lico">📍</span>GPS Actual';
+    showToast('No se pudo obtener el GPS');
+  });
+};
+window.toggleManualLoc = function(){
+  var inp=document.getElementById('regUbicacion');
+  var h=inp.style.display==='none';
+  inp.style.display=h?'block':'none';
+  document.getElementById('locManual').classList.toggle('active',h);
+};
+
+// ── PDF ───────────────────────────────────────────────
+window.doPDF = function(r, isModified) {
+  r=r||resConfirmada; if (!r) return;
+  var pts=r.date.split('-');
+  var dl=new Date(+pts[0],+pts[1]-1,+pts[2]).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var tc=(isModified||r.modified)?'#9b2226':'#1a1a2e';
+  var tt=(isModified||r.modified)?'RESERVA MODIFICADA':'Confirmación de Reserva';
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>'
+    +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap\');'
+    +'*{margin:0;padding:0;box-sizing:border-box}body{font-family:Lato,sans-serif;background:#fff;color:#1a1a2e;padding:40px}'
+    +'.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #c9a96e;padding-bottom:20px;margin-bottom:28px}'
+    +'.brand{font-family:"Playfair Display",serif;font-size:26px;letter-spacing:2px}.brand span{color:#c9a96e}'
+    +'.badge{background:#1a1a2e;color:#c9a96e;padding:5px 14px;font-size:10px;letter-spacing:3px;text-transform:uppercase}'
+    +'.ttl{font-family:"Playfair Display",serif;font-size:22px;margin-bottom:5px;color:'+tc+'}'
+    +'.sub{color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:28px}'
+    +'.sb{background:#1a1a2e;color:#c9a96e;padding:16px 22px;display:flex;justify-content:space-between;margin-bottom:20px}'
+    +'.sl{font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}.sv{font-family:"Playfair Display",serif;font-size:18px}'
+    +'.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}'
+    +'.f{background:#f8f6f0;padding:14px}.fl{font-size:9px;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}'
+    +'.fv{font-size:15px;font-weight:700}.full{grid-column:1/-1}'
+    +'.ft{border-top:1px solid #e0d8cc;padding-top:14px;display:flex;justify-content:space-between;color:#aaa;font-size:10px}'
+    +'@media print{body{padding:0}}</style></head><body>'
+    +'<div class="hd"><div class="brand">EVENT<span>BOOK</span></div><div class="badge">Comprobante de Reserva</div></div>'
+    +'<div class="ttl">'+tt+'</div>'
+    +'<div class="sub">Emitido el '+new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})+'</div>'
+    +'<div class="sb"><div><div class="sl">Estado de pago</div><div class="sv">'+r.paymentStatus+'</div></div>'
+    +'<div style="text-align:right"><div class="sl">Monto</div><div class="sv">'+(r.amount?'$'+r.amount:'—')+'</div></div></div>'
+    +'<div class="grid">'
+    +'<div class="f"><div class="fl">Cliente</div><div class="fv">'+r.clientName+'</div></div>'
+    +'<div class="f"><div class="fl">Código</div><div class="fv" style="font-family:monospace;font-size:12px">'+(r.id||'').substr(0,14)+'</div></div>'
+    +'<div class="f"><div class="fl">Fecha</div><div class="fv">'+dl+'</div></div>'
+    +'<div class="f"><div class="fl">Horario</div><div class="fv">'+r.startTime+' — '+r.endTime+'</div></div>'
+    +(r.comments?'<div class="f full"><div class="fl">Observaciones</div><div class="fv" style="font-weight:400;font-size:13px">'+r.comments+'</div></div>':'')
+    +(r.createdBy?'<div class="f"><div class="fl">Registrado por</div><div class="fv">'+r.createdBy+'</div></div>':'')
+    +'</div>'
+    +'<div class="ft"><span>EVENTBOOK — Sistema de Reservas</span><span style="font-family:monospace">'+(r.id||'').substr(0,12)+'</span><span>Documento automático</span></div>'
+    +'<script>window.onload=function(){window.print()}<\/script>'
+    +'</body></html>';
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='reserva-'+(r.id||'doc')+(r.modified?'-modificada':'')+'.html'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Comprobante descargado');
+};
+
+// ── Helpers ───────────────────────────────────────────
+function updateBadge() {
+  var c=reservas.filter(function(r){ return r.status!=='cancelada'; }).length;
+  var b=document.getElementById('nbadge');
+  if (b){ b.textContent=c; b.style.display=c>0?'flex':'none'; }
+}
+function setSyncSt(ok){
+  var d=document.getElementById('sdot'),l=document.getElementById('slbl');
+  if(d) d.style.background=ok?'#2d6a4f':'#9b2226';
+  if(l) l.textContent=ok?'FIREBASE':'OFFLINE';
+}
+function showToast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.style.display='block';
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(function(){ el.style.display='none'; },3000);
+}
+function showErrEl(el,msg){ el.textContent=msg; el.style.display='block'; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function setBtnLoading(id,loading){
+  var b=document.getElementById(id);
+  if(!b) return;
+  b.disabled=loading;
+  b.textContent=loading?'Cargando...':b.getAttribute('data-orig')||(loading?'...':b.textContent);
+}
+function simpleHash(str){
+  var h=5381;
+  for(var i=0;i<str.length;i++) h=((h<<5)+h)+str.charCodeAt(i);
+  return (h>>>0).toString(36);
+}
+</script>
+</body>
+</html>
